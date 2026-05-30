@@ -70,7 +70,7 @@ body {
       rgba(0, 0, 0, 0.18) 65%,
       rgba(0, 0, 0, 0.42) 100%
     ),
-    url("/nissanbg.png");
+    url("/nissanbg.webp");
   background-repeat: no-repeat;
   background-size: 100% auto;
   background-position: 50% 100%;
