@@ -6,13 +6,13 @@ import { Environment, OrbitControls, Text, useGLTF, Html, useProgress } from "@r
 gsap.registerPlugin(ScrollTrigger);
 
 
-function SceneTitle() {
+function SceneTitle({ isMobile }) {
   return (
     <>
       <Text
-      font="/fonts/Conthrax-SemiBold.otf"
-        position={[0, 2.8, -2]}
-        fontSize={0.16}
+        font="/fonts/Conthrax-SemiBold.otf"
+        position={isMobile ? [0, 2.15, -2] : [0, 2.8, -2]}
+        fontSize={isMobile ? 0.2 : 0.16}
         color="#ff0000"
         anchorX="center"
         anchorY="middle"
@@ -23,63 +23,58 @@ function SceneTitle() {
 
       <Text
         font="/fonts/PLANK___.TTF"
-        position={[0, 2, -2]}
-        fontSize={1.05}
+        position={isMobile ? [0, 1.55, -2] : [0, 2, -2]}
+        fontSize={isMobile ? 1 : 1.05}
         color="#000000"
         anchorX="center"
         anchorY="middle"
         letterSpacing={0.04}
-        maxWidth={14}
+        maxWidth={isMobile ? 8.5 : 14}
       >
-        NISSAN GTR  
+        NISSAN GTR
       </Text>
     </>
   );
 }
 
-function CarModel() {
+function CarModel({ isMobile }) {
   const { scene } = useGLTF("/models/nissangtr-draco.glb");
 
   return (
-    <group position={[0, -1.6, -0.1]} 
-    scale={180}
-    rotation={[0.01, 0.1, 0]}>
-    <primitive object={scene} />
+    <group
+      position={isMobile ? [0, -2.2, 0.5] : [0, -1.6, -0.1]}
+      scale={isMobile ? 120 : 180}
+      rotation={[0.01, 0.1, 0]}
+    >
+      <primitive object={scene} />
     </group>
   );
 }
 
-function RotatingShowroom({ progressRef }) {
+
+
+function RotatingShowroom({ progressRef, isMobile }) {
   const carRef = useRef();
   const textRef = useRef();
 
   useFrame((state) => {
     if (!carRef.current || !textRef.current) return;
-    
-    // Base values
+
     const autoTime = state.clock.elapsedTime;
     const scrollValue = progressRef.current;
-    
-    // --- CAR SPEED ---
-    // Auto-rotates at 0.15 speed, and spins 1 full time (Math.PI * 2) per scroll
-    carRef.current.rotation.y = (autoTime * 0.20) + (scrollValue * Math.PI * 2);
-    
-    // --- TEXT SPEED ---
-    // Slower auto-rotation (0.05) and slower scroll rotation (Math.PI * 1)
-    // Change these numbers to make it orbit faster, slower, or even backwards (use negative numbers)
-    textRef.current.rotation.y = (autoTime * 0.55) + (scrollValue * Math.PI * 1);
+
+    carRef.current.rotation.y = (autoTime * (isMobile ? 0.2 : 0.2)) + (scrollValue * Math.PI * 2);
+    textRef.current.rotation.y = (autoTime * (isMobile ? 0.55 : 0.55)) + (scrollValue * Math.PI * 1);
   });
 
   return (
     <>
-      {/* Text Group */}
       <group ref={textRef}>
-        <SceneTitle />
+        <SceneTitle isMobile={isMobile} />
       </group>
 
-      {/* Car Group */}
       <group ref={carRef}>
-        <CarModel />
+        <CarModel isMobile={isMobile} />
       </group>
     </>
   );
@@ -93,9 +88,9 @@ function Loader() {
   return (
     <Html center>
       <div className="premium-loader">
-<span className="loader-text">
-  INITIALIZING ENGINE<span className="typing-dots"></span>
-</span>
+      <span className="loader-text">
+        INITIALIZING ENGINE<span className="typing-dots"></span>
+      </span>
         <div className="loader-bar">
           <div
             className="loader-fill"
@@ -107,7 +102,7 @@ function Loader() {
   );
 }
 function SectionMarquee({
-  items = ["GT-R", "NISMO", "HERITAGE", "PRECISION", "LEGACY"],
+  items = ["GTR", "NISMO", "HERITAGE", "PRECISION", "LEGACY"],
   className = "",
 }) {
   const content = [...items, ...items];
@@ -128,7 +123,7 @@ function SectionMarquee({
 export default function CanvasScrubber() {
   const containerRef = useRef(null);
     const pageRef = useRef(null);
-
+const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
   const progressRef = useRef(0);
 
  useEffect(() => {
@@ -181,18 +176,25 @@ textRevealEls.forEach((el) => {
 imageRevealEls.forEach((el) => {
   gsap.fromTo(
     el,
-    { autoAlpha: 0, y: 90, scale: 0.92, filter: "blur(12px)" },
+    {
+      autoAlpha: 0,
+      y: 48,
+      scale: 0.94,
+      filter: "blur(10px)",
+      force3D: true,
+    },
     {
       autoAlpha: 1,
       y: 0,
       scale: 1,
       filter: "blur(0px)",
-      ease: "none",
+      ease: "power3.out",
       scrollTrigger: {
         trigger: el,
-        start: "top 98%",
-        end: "top 62%",
-        scrub: 1,
+        start: "top 50%",
+        end: "top 30%",
+        scrub: 1.05,
+        invalidateOnRefresh: true,
       },
     }
   );
@@ -255,16 +257,16 @@ imageRevealEls.forEach((el) => {
     >
       <div className="canvas-shell relative w-full h-full">
 
-           <Canvas
-             dpr={[1, 1.5]}
-             className="canvas-element relative z-20"
-             camera={{ position: [7, 0, 10], fov: 30 }}  
-              gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
-              onCreated={({ gl, camera }) => {
-              gl.setClearColor(0x000000, 0);
-              camera.lookAt(0, 0, 0);
-              }}
-            >
+          <Canvas
+          dpr={isMobile ? [1, 1.2] : [1, 1.5]}
+          className="canvas-element relative z-20"
+          camera={isMobile ? { position: [6.2, 0.3, 11.5], fov: 38 } : { position: [7, 0, 10], fov: 30 }}
+          gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
+          onCreated={({ gl, camera }) => {
+            gl.setClearColor(0x000000, 0);
+            camera.lookAt(0, 0, 0);
+            }}
+           >
             <Suspense fallback={<Loader />}>
             <ambientLight intensity={2.2} />
             <directionalLight position={[5, 5, 5]} intensity={3} />
@@ -272,8 +274,7 @@ imageRevealEls.forEach((el) => {
             <Environment preset="city" resolution={256}/>
             
             {/* Wrapped both the text and car together here */}
-            <RotatingShowroom progressRef={progressRef} />
-
+<RotatingShowroom progressRef={progressRef} isMobile={isMobile} />
             <OrbitControls
               enablePan={false}
               enableZoom={false}
@@ -410,9 +411,9 @@ imageRevealEls.forEach((el) => {
           {Array.from({ length: 12 }).map((_, i) => <span key={i}></span>)}
         </div>
         <p className="spec-kicker">Performance / Aero efficiency</p>
-        <h2 className="spec-title">PERFORMANCE</h2>
+<h2 className="spec-title spec-title--performance">PERFORMANCE</h2>
         <h3 className="spec-subtitle">Enhanced aerodynamics</h3>
-        <p className="spec-desc">
+        <p className="spec-desc spec-desc--performance">
           GT-R NISMO’s aerodynamics cut like a knife for unmatched on-road thrills.
           Nissan highlights the carbon-fiber rear spoiler, redesigned front and rear
           fascias, carbon-fiber side sills, and fender vents as part of its aero-focused setup.
@@ -434,7 +435,7 @@ imageRevealEls.forEach((el) => {
     </article>
   </div>
 </section>
-<SectionMarquee items={["Nissan", "GT-R", "NISMO", "R35"]} />
+<SectionMarquee items={["Nissan", "GTR", "NISMO", "R35"]} />
 
 
 <section className="specs-section carbon-roof-section">
@@ -490,9 +491,10 @@ imageRevealEls.forEach((el) => {
         <div className="spec-rule"></div>
 
         <div className="spec-package-list specs-stagger">
+                    <div className="package-chip">Clear-coated carbon-fiber hood</div>
+
           <div className="package-chip">Special Edition Takumi certification plate</div>
           <div className="package-chip">20" NISMO Special Edition Black RAYS forged-alloy wheels</div>
-          <div className="package-chip">Clear-coated carbon-fiber hood</div>
         </div>
       </div>
 
