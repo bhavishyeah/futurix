@@ -1191,7 +1191,7 @@ padding-left:-1000px;
 
 
   .spec-stage-image.third-img {
-    width: min(300vw, 940px)!;
+    width: min(300vw, 940px);
     max-width: none;
     height: auto;
     margin-left:4px !important;
