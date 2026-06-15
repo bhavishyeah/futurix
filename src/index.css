@@ -91,7 +91,10 @@ img {
   background-repeat: no-repeat;
   background-size: 100% auto;
   background-position: 50% 100%;
-  background-attachment: fixed;
+  /* PERF: Removed background-attachment:fixed - causes expensive compositing
+     layer on every scroll event, especially bad on mobile/low-end devices.
+     Use a pseudo-element or scroll transform for parallax instead. */
+  background-attachment: scroll;
 }
 
 .canvas-shell {
@@ -379,10 +382,14 @@ img {
   letter-spacing: 0.18em;
 }
 
+/* PERF: Removed will-change from all elements - having will-change on dozens of
+   elements wastes GPU memory and actually HURTS performance. Let the browser
+   optimize only during active animations via GSAP's force3D.
+   PERF: Removed filter:blur from initial states - blur is extremely expensive
+   on low-end GPUs (requires full-layer re-render). Use opacity-only reveals. */
 .specs-reveal,
 .specs-stagger > *,
 .spec-stage img {
-  will-change: transform, opacity, filter;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
@@ -390,8 +397,7 @@ img {
 .specs-reveal,
 .specs-stagger > * {
   opacity: 0;
-  transform: translateY(48px);
-  filter: blur(8px);
+  transform: translateY(40px);
 }
 
 .marquee-wrapper {
@@ -727,7 +733,9 @@ img {
   width: max-content;
   white-space: nowrap;
   animation: sectionMarqueeMove 22s linear infinite;
+  /* PERF: will-change:transform is OK here since it's a continuous animation */
   will-change: transform;
+  contain: layout style;
 }
 
 .section-marquee-item {
